@@ -1,0 +1,488 @@
+<html><head><base href="." />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sistema de Login y Universidad</title>
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+body {
+    min-height: 100vh;
+    background: #2a2a2a url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise' x='0' y='0'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeBlend mode='screen'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.4'/%3E%3C/svg%3E");
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.container {
+    background: rgba(28, 28, 28, 0.85);
+    backdrop-filter: blur(20px);
+    padding: 2rem;
+    border-radius: 13px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    width: 100%;
+    max-width: 400px;
+}
+
+.logo-container {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.logo-container img {
+    width: 150px;
+    height: auto;
+}
+
+.window-controls {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    display: flex;
+    gap: 8px;
+}
+
+.control {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.close { background: #ff5f56; }
+.minimize { background: #ffbd2e; }
+.maximize { background: #27c93f; }
+
+.device-info {
+    margin-top: 20px;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 7px;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 13px;
+}
+
+.device-info div {
+    margin: 5px 0;
+    display: flex;
+    justify-content: space-between;
+}
+
+.device-info span {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.login-form, .university-selector {
+    display: none;
+    margin-top: 20px;
+}
+
+.login-form.active, .university-selector.active {
+    display: block;
+}
+
+h2 {
+    color: #fff;
+    text-align: center;
+    margin-bottom: 1.5rem;
+    font-weight: 500;
+}
+
+input, select {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border: none;
+    border-radius: 7px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+input:focus, select:focus {
+    outline: none;
+    background: rgba(255, 255, 255, 0.15);
+}
+
+select {
+    max-height: 200px;
+    overflow-y: auto;
+    appearance: none;
+}
+
+select option {
+    background: #2a2a2a;
+    color: white;
+    padding: 10px;
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 7px;
+    background: #0071e3;
+    color: white;
+    cursor: pointer;
+    transition: 0.3s;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+button:hover {
+    background: #0077ed;
+    transform: translateY(-1px);
+}
+
+.progress-container {
+    display: none;
+    margin-top: 20px;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    overflow: hidden;
+    position: relative;
+}
+
+.progress {
+    width: 30%;
+    height: 100%;
+    background: linear-gradient(90deg, #27c93f, #0071e3);
+    position: absolute;
+    animation: loading 1.5s ease-in-out infinite;
+    border-radius: 3px;
+}
+
+@keyframes loading {
+    0% {
+        left: -30%;
+    }
+    100% {
+        left: 100%;
+    }
+}
+
+.status {
+    color: rgba(255, 255, 255, 0.7);
+    text-align: center;
+    margin-top: 10px;
+    font-size: 13px;
+}
+
+.unique-code {
+    margin-top: 15px;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 7px;
+    color: rgba(255, 255, 255, 0.9);
+    font-family: monospace;
+    font-size: 14px;
+    text-align: center;
+    letter-spacing: 2px;
+    display: none;
+}
+
+.eduhack-banner {
+    margin-top: 20px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+    border-radius: 7px;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.eduhack-banner .title {
+    color: #fff;
+    font-size: 16px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    background: linear-gradient(90deg, #0071e3, #27c93f);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.server-info {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 13px;
+    text-align: left;
+    display: grid;
+    gap: 8px;
+}
+
+.server-info div {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.apple-logo {
+    width: 14px;
+    height: 14px;
+    fill: rgba(255, 255, 255, 0.7);
+}
+
+.snowflake {
+    position: fixed;
+    color: #fff;
+    font-size: 1em;
+    font-family: Arial, sans-serif;
+    text-shadow: 0 0 5px #000;
+    opacity: 0.8;
+    z-index: 1;
+    pointer-events: none;
+}
+
+@keyframes snowfall {
+    0% {
+        transform: translateY(-100vh) rotate(0deg);
+    }
+    100% {
+        transform: translateY(100vh) rotate(360deg);
+    }
+}
+</style>
+</head>
+<body>
+    <div class="container">
+        <div class="window-controls">
+            <div class="control close"></div>
+            <div class="control minimize"></div>
+            <div class="control maximize"></div>
+        </div>
+        
+        <div class="logo-container">
+            <img src="https://i.ibb.co/4MczhSV/Logo-Tienda-de-Frutas-y-Verduras-Circular-Verde-removebg-preview-1.png" alt="Logo">
+        </div>
+        
+        <div class="device-info">
+            <div>Sistema: <span id="os"></span></div>
+            <div>Navegador: <span id="browser"></span></div>
+            <div>Fecha: <span id="date"></span></div>
+            <div>Hora: <span id="time"></span></div>
+            <div>Dispositivo: <span id="device"></span></div>
+            <div>Velocidad: <span id="network"></span></div>
+            <div>Resolución: <span id="resolution"></span></div>
+        </div>
+
+        <div class="login-form active">
+            <h2>Iniciar Sesión</h2>
+            <input type="text" id="username" placeholder="Usuario" required>
+            <input type="password" id="password" placeholder="Contraseña" required>
+            <button onclick="login()">Ingresar</button>
+        </div>
+
+        <div class="university-selector">
+            <h2>Seleccionar Universidad</h2>
+            <select id="university">
+                <option value="">Seleccione una universidad</option>
+                <option value="unam">UNAM</option>
+                <option value="ipn">IPN</option>
+                <option value="uam">UAM</option>
+                <option value="unmsm">UNMSM</option>
+                <option value="unalm">UNALM</option>
+                <option value="pucp">PUCP</option>
+                <option value="unfv">UNFV</option>
+                <option value="unsa">UNSA</option>
+                <option value="unsaac">UNSAAC</option>
+                <option value="unp">UNP</option>
+                <option value="unjbg">UNJBG</option>
+                <option value="untrm">UNTRM</option>
+                <option value="unt">UNT</option>
+                <option value="unica">UNICA</option>
+                <option value="unc">UNC</option>
+                <option value="ucv">UCV</option>
+                <option value="uap">UAP</option>
+                <option value="upt">UPT</option>
+                <option value="unj">UNJ</option>
+                <option value="unay">UNAY</option>
+                <option value="upn">UPN</option>
+                <option value="uag">UAG</option>
+                <option value="unheval">UNHEVAL</option>
+                <option value="uca">UCA</option>
+                <option value="unsm">UNSM</option>
+                <option value="ugr">UGR</option>
+                <option value="una">UNA</option>
+                <option value="utec">UTEC</option>
+                <option value="uned">UNED</option>
+                <option value="unse">UNSE</option>
+                <option value="upc">UPC</option>
+                <option value="usmp">USMP</option>
+                <option value="udep">UDEP</option>
+                <option value="ulima">ULIMA</option>
+                <option value="ucal">UCAL</option>
+                <option value="usil">USIL</option>
+                <option value="uch">UCH</option>
+                <option value="ucsm">UCSM</option>
+                <option value="upao">UPAO</option>
+                <option value="uct">UCT</option>
+                <option value="ucom">U. de la Comunicación</option>
+                <option value="ulima">U. de Lima</option>
+                <option value="upt">U. Privada de Tacna</option>
+                <option value="upn">U. Privada del Norte</option>
+                <option value="ucsur">UCSUR</option>
+                <option value="senati">SENATI</option>
+            </select>
+            <button onclick="inject()">Inyectar</button>
+            
+            <div class="unique-code" id="uniqueCode"></div>
+            
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress"></div>
+                </div>
+                <div class="status">Verificando...</div>
+            </div>
+            
+            <div class="eduhack-banner">
+                <div class="title">EduHack.pe</div>
+                <div class="server-info">
+                    <div>Servidor de Inyección V.007</div>
+                    <div>Ubicación: Trujillo</div>
+                    <div>Señal: 158.32 ms | 864.7 Mbps</div>
+                    <div>
+                        Hospeda: iPhone 15 Pro Max
+                        <svg class="apple-logo" viewBox="0 0 384 512">
+                            <path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+function updateDeviceInfo() {
+    const os = navigator.platform || navigator.userAgent;
+    document.getElementById('os').textContent = os;
+
+    const browser = navigator.userAgent.match(/(firefox|chrome|safari|opera|msie|trident(?=\/))\/?\s*(\d+)/i)[1];
+    document.getElementById('browser').textContent = browser;
+
+    const now = new Date();
+    document.getElementById('date').textContent = now.toLocaleDateString();
+    
+    function updateTime() {
+        const now = new Date();
+        document.getElementById('time').textContent = now.toLocaleTimeString();
+    }
+    updateTime();
+    setInterval(updateTime, 1000);
+
+    const device = /Mobile|iP(hone|od|ad)|Android|BlackBerry|IEMobile/.test(navigator.userAgent) 
+        ? 'Mobile' 
+        : 'Desktop';
+    document.getElementById('device').textContent = device;
+
+    if ('connection' in navigator) {
+        const connection = navigator.connection;
+        document.getElementById('network').textContent = connection.effectiveType || 'Desconocida';
+    } else {
+        document.getElementById('network').textContent = 'No disponible';
+    }
+
+    document.getElementById('resolution').textContent = `${window.screen.width}x${window.screen.height}`;
+}
+
+document.addEventListener('DOMContentLoaded', updateDeviceInfo);
+
+function login() {
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+    
+    if (username && password) {
+        document.querySelector('.login-form').classList.remove('active');
+        document.querySelector('.university-selector').classList.add('active');
+    } else {
+        alert('Por favor complete todos los campos');
+    }
+}
+
+function inject() {
+    const university = document.getElementById('university').value;
+    
+    if (!university) {
+        alert('Por favor seleccione una universidad');
+        return;
+    }
+
+    const progressContainer = document.querySelector('.progress-container');
+    const status = document.querySelector('.status');
+    const uniqueCode = document.getElementById('uniqueCode');
+    
+    progressContainer.style.display = 'block';
+    uniqueCode.style.display = 'none'; // Hide code initially
+    
+    const timestamp = Date.now().toString(36);
+    const randomStr = Math.random().toString(36).substr(2, 5);
+    const uniqueString = `${timestamp}-${randomStr}-${university}`.toUpperCase();
+    
+    let messageIndex = 0;
+    const messages = [
+        'Verificando...',
+        'Estableciendo conexión...',
+        'Procesando datos...',
+        'Inyectando...',
+        'Validando acceso...'
+    ];
+    
+    // Update status messages
+    const messageInterval = setInterval(() => {
+        messageIndex = (messageIndex + 1) % messages.length;
+        status.textContent = messages[messageIndex];
+    }, 2000);
+
+    // Show unique code after 10 minutes (600000 milliseconds)
+    setTimeout(() => {
+        uniqueCode.style.display = 'block';
+        uniqueCode.textContent = uniqueString;
+        status.textContent = 'Proceso completado';
+        clearInterval(messageInterval); // Stop updating messages
+    }, 600000); // Changed from 15000 to 600000
+}
+
+function createSnowflake() {
+    const snowflake = document.createElement('div');
+    snowflake.classList.add('snowflake');
+    snowflake.innerHTML = '❄';
+    
+    // Random starting position
+    snowflake.style.left = Math.random() * 100 + 'vw';
+    
+    // Random animation duration between 5 and 15 seconds
+    const animationDuration = Math.random() * 10 + 5;
+    snowflake.style.animation = `snowfall ${animationDuration}s linear infinite`;
+    
+    // Random size between 0.3em and 1em
+    snowflake.style.fontSize = (Math.random() * 0.7 + 0.3) + 'em';
+    
+    document.body.appendChild(snowflake);
+    
+    // Remove snowflake after animation completes
+    setTimeout(() => {
+        snowflake.remove();
+    }, animationDuration * 1000);
+}
+
+// Create snowflakes periodically
+setInterval(createSnowflake, 200);
+</script>
+</body>
+</html>
